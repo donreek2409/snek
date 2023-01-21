@@ -1,11 +1,16 @@
 import time, sys
 from pynput import keyboard
 
+chars = []
+
 def on_press(key):
-    pass
+    if chars.count(key) == 0:
+        chars.append(key)
 
 def on_release(key):
-    pass
+    if chars.count(key) != 0:
+        chars.remove(key)
+
 
 listener = keyboard.Listener(on_press=on_press, on_release=on_release)
 listener.start()
@@ -52,11 +57,7 @@ def main():
     console.clear()
     last_inp = None
     while 2+2==4:
-        inp = get_input()
-        vel = input_handler(inp)
-        if inp != -1:
-            console.move_cursor(vel[0], vel[1])
-        else:
-            time.sleep(0.2)
-        last_inp = inp
+        print(chars)
+
+
 main()
