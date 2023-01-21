@@ -1,5 +1,14 @@
-import time, sys, msvcrt
-from getkey import getkey, keys
+import time, sys
+from pynput import keyboard
+
+def on_press(key):
+    pass
+
+def on_release(key):
+    pass
+
+listener = keyboard.Listener(on_press=on_press, on_release=on_release)
+listener.start()
 
 class Console:
     def __init__(self):
@@ -23,14 +32,7 @@ class Console:
     def cursor_pos(self, x = 0,y = 0):
         self.write(f"\u001b[{y};{x}H")
    
-def get_input():
-    chars = []
-    final_char = -1
-    if msvcrt.kbhit():
-        while msvcrt.kbhit():
-            chars.append(ord(msvcrt.getch()))
-        final_char = chars[len(chars)-1]
-    return final_char
+
 
 def input_handler(inp):
     vel = [0,0]
