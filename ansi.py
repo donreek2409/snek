@@ -1,6 +1,7 @@
 import time, sys
 from pynput import keyboard
 
+#initiating Listener (outside of an object...grrr!)
 chars = []
 
 def on_press(key):
@@ -10,7 +11,6 @@ def on_press(key):
 def on_release(key):
     if chars.count(key) != 0:
         chars.remove(key)
-
 
 listener = keyboard.Listener(on_press=on_press, on_release=on_release)
 listener.start()
@@ -36,8 +36,6 @@ class Console:
 
     def cursor_pos(self, x = 0,y = 0):
         self.write(f"\u001b[{y};{x}H")
-   
-
 
 def input_handler(inp):
     vel = [0,0]
@@ -55,9 +53,8 @@ def input_handler(inp):
 def main():
     console = Console()
     console.clear()
-    last_inp = None
     while 2+2==4:
+        time.sleep(1)
         print(chars)
-
 
 main()
