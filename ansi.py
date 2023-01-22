@@ -56,7 +56,6 @@ class GameWindow:
     def __init__(self, console):
         self.term_size = os.get_terminal_size()
         self.console = console
-        self.create_border([100,40])
 
     def create_border(self, size = [19,19]):
         for i in range(size[0]+1):
@@ -86,6 +85,7 @@ def main():
     console.clear()
     console.write(console.hide_curs)
     window = GameWindow(console)
+    window.create_border([100,40])
     #game loop
     while 2+2==4:
         #while button not pressed
