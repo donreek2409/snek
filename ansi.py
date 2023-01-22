@@ -3,7 +3,6 @@ from pynput import keyboard
 
 #initiating Listener (outside of an object...grrr!)
 chars = []
-term_size = os.get_terminal_size()
 
 def on_press(key):
     if chars.count(str(key)) == 0:
@@ -22,11 +21,24 @@ class Console:
         self.home = "\u001b[1000A\u001b[1000D"
         self.clear()
         self.curs_pos = [0,0]
+        self.hide_curs = '\u001b[?25l'
+        self.show_curs = '\u001b[?25h'
+        #Color
+        #backgrounds
+        self.col_back_white = "\u001b[47m"
+        self.col_back_black = "\u001b[40m"
 
-    def write(self, text, move = False, loc = [0,0]):
+    def write(self, text, move = False, loc = [0,0], col = False, text_color = ''):
+        color_code = ''
+        reset_color_code = ''
         if move:
             self.cursor_pos(loc[0], loc[1])
-        sys.stdout.write(text)
+        if col:
+            if text_color == 'white_back':
+                color_code = self.col_back_white
+                reset_color_code = self.col_back_black
+
+        sys.stdout.write(color_code+text+reset_color_code)
         sys.stdout.flush()
 
     def clear(self):
@@ -39,6 +51,23 @@ class Console:
 
     def cursor_pos(self, x = 0,y = 0):
         self.write(f"\u001b[{y};{x}H")
+
+class GameWindow:
+    def __init__(self, console):
+        self.term_size = os.get_terminal_size()
+        self.console = console
+        self.create_border([100,40])
+
+    def create_border(self, size = [19,19]):
+        for i in range(size[0]+1):
+            self.console.write(" ", True, [i, 0], True, 'white_back')
+            self.console.write(" ", True, [i, size[1]], True, 'white_back')
+        for i in range(size[1]):
+            self.console.write(" ", True, [0, i], True, 'white_back')
+            self.console.write(" ", True, [size[0], i], True, 'white_back')
+    def get_term_size(self):
+        self.term_size = os.get_terminal_size()
+        return self.term_size
 
 def input_handler():
     vel = [0,0]
@@ -55,9 +84,14 @@ def input_handler():
 def main():
     console = Console()
     console.clear()
+    console.write(console.hide_curs)
+    window = GameWindow(console)
+    #game loop
     while 2+2==4:
+        #while button not pressed
         while len(chars) == 0:
             time.sleep(0.01)
+        #while button pressed
         while len(chars) != 0:
             vel = input_handler()
             time.sleep(0.1)
