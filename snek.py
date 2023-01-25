@@ -44,6 +44,11 @@ class Console:
     def clear(self):
         self.write(self.clearscr + self.home)
 
+    def delete(self, tile:list):
+        self.cursor_pos(tile[0]+1, tile[1])
+        self.write("\b")
+        self.curs_pos = [self.curs_pos[0] - 1,self.curs_pos[1]]
+
     def move_cursor(self, x = 0,y = 0):
         new_pos = [self.curs_pos[0] + x, self.curs_pos[1]+y]
         self.write(f"\u001b[{new_pos[1]};{new_pos[0]}H")
@@ -51,9 +56,10 @@ class Console:
 
     def cursor_pos(self, x = 0,y = 0):
         self.write(f"\u001b[{y};{x}H")
+        self.curs_pos = [x,y]
 
 class GameWindow:
-    def __init__(self, console):
+    def __init__(self, console, size:list):
         self.term_size = os.get_terminal_size()
         self.console = console
 
@@ -67,6 +73,11 @@ class GameWindow:
     def get_term_size(self):
         self.term_size = os.get_terminal_size()
         return self.term_size
+
+class Snek:
+    def __input__(self, starting_segs, start_pos):
+        self.starting_segs
+        self.segs = []
 
 def input_handler():
     vel = [0,0]
@@ -84,7 +95,7 @@ def main():
     console = Console()
     console.clear()
     console.write(console.hide_curs)
-    window = GameWindow(console)
+    window = GameWindow(console, [100,40])
     window.create_border([100,40])
     #game loop
     while 2+2==4:
@@ -94,8 +105,9 @@ def main():
         #while button pressed
         while len(chars) != 0:
             vel = input_handler()
+            if chars.count("Key.left"):
+                console.write(str(window.term_size), True, [10,10], True, "white_back")
             time.sleep(0.1)
-
 
 
 main()
