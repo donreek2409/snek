@@ -45,8 +45,7 @@ class Console:
         self.write(self.clearscr + self.home)
 
     def delete(self, tile:list):
-        self.cursor_pos(tile[0]+1, tile[1])
-        self.write("\b")
+        self.write(" ", True, tile)
         self.curs_pos = [self.curs_pos[0] - 1,self.curs_pos[1]]
 
     def move_cursor(self, x = 0,y = 0):
@@ -60,9 +59,12 @@ class Console:
 
 class GameWindow:
     def __init__(self, console, size:list):
-        self.term_size = os.get_terminal_size()
+        self.size = size
+        self.term_size = [os.get_terminal_size().columns, os.get_terminal_size().lines]
         self.console = console
-
+        if size[0] > self.term_size[0] or size[1] > self.term_size[1]:
+            self.too_small()
+        self.create_border(self.size)
     def create_border(self, size = [19,19]):
         for i in range(size[0]+1):
             self.console.write(" ", True, [i, 0], True, 'white_back')
@@ -73,12 +75,43 @@ class GameWindow:
     def get_term_size(self):
         self.term_size = os.get_terminal_size()
         return self.term_size
+    def too_small(self):
+        self.console.clear()
+        self.console.write("Console not large enough for application. Quitting now...")
+        quit()
+
+class Debug:
+    def __init__(self, console, window):
+        self.console = console
+        self.window = window
+        self.write_loc = [window.size[0], window.size[1]]
+    def write(self, text):
+        self.console.cursor_pos(self.write_loc[0] + 3, 0)
+        sys.stdout.write(text)
+        sys.stdout.flush()
 
 class Snek:
-    def __input__(self, starting_segs, start_pos):
-        self.starting_segs
-        self.segs = []
+    def __init__(self, starting_segs:int, start_pos:list, console:Console, debug):
+        self.segs = [start_pos]
+        self.snek_len = starting_segs
+        self.console = console
+        self.debug = debug
 
+    def move_snek(self, vel):
+        new_pos = [self.segs[0][0]+vel[0], self.segs[0][1]+vel[1]]
+        self.console.cursor_pos(new_pos[0], new_pos[1])
+        self.console.write("\u001b[42m \u001b[0m")
+        if len(self.segs) < self.snek_len:
+            self.segs.append([0,0])
+        else:
+            self.console.delete(self.segs[len(self.segs) - 1])
+        for seg in range(len(self.segs)-1, -1, -1):
+            if seg > 0:
+                self.segs[seg] = self.segs[seg-1]
+            else:
+                self.segs[0] = new_pos
+                break
+                
 def input_handler():
     vel = [0,0]
     if chars.count("Key.up"):
@@ -96,17 +129,19 @@ def main():
     console.clear()
     console.write(console.hide_curs)
     window = GameWindow(console, [100,40])
-    window.create_border([100,40])
+    debug = Debug(console, window)
+    snek = Snek(3, [10,10], console, debug)
     #game loop
     while 2+2==4:
         #while button not pressed
         while len(chars) == 0:
-            time.sleep(0.01)
+            snek.move_snek([1,0])
+            time.sleep(0.3)
         #while button pressed
         while len(chars) != 0:
             vel = input_handler()
-            if chars.count("Key.left"):
-                console.write(str(window.term_size), True, [10,10], True, "white_back")
+            """if chars.count("Key.left"):
+                console.write(str(window.term_size), True, [10,10], True, "white_back")"""
             time.sleep(0.1)
 
 
