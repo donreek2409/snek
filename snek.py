@@ -130,7 +130,8 @@ def main():
     console.write(console.hide_curs)
     window = GameWindow(console, [100,40])
     debug = Debug(console, window)
-    snek = Snek(3, [10,10], console, debug)
+    mid_win = [round(window.size[0]/2), round(window.size[1]/2)]
+    snek = Snek(3, mid_win, console, debug)
     #game loop
     while 2+2==4:
         #while button not pressed
