@@ -3,10 +3,22 @@ from pynput import keyboard
 
 #initiating Listener (outside of an object...grrr!)
 chars = []
+step_time = 0.2
+skip_time = 0.05
+velocity = [1,0]
 
 def on_press(key):
     if chars.count(str(key)) == 0:
         chars.append(str(key))
+    global velocity
+    if str(key) == ("Key.up") and velocity != [0,1]:
+        velocity = [0,-1]
+    if str(key) ==("Key.down") and velocity != [0, -1]:
+        velocity = [0,1]
+    if str(key) ==("Key.left") and velocity != [1,0]:
+        velocity = [-1,0]
+    if str(key) ==("Key.right") and velocity != [-1, 0]:
+        velocity = [1,0]
 
 def on_release(key):
     if chars.count(str(key)) != 0:
@@ -77,7 +89,7 @@ class GameWindow:
         return self.term_size
     def too_small(self):
         self.console.clear()
-        self.console.write("Console not large enough for application. Quitting now...")
+        self.console.write("Console not large enough for application. Please resize your console window and relaunch.\nQuitting now...")
         quit()
 
 class Debug:
@@ -111,18 +123,6 @@ class Snek:
             else:
                 self.segs[0] = new_pos
                 break
-                
-def input_handler():
-    vel = [0,0]
-    if chars.count("Key.up"):
-        vel[1] -= 1
-    if chars.count("Key.down"):
-        vel[1] += 1
-    if chars.count("Key.left"):
-        vel[0] -= 1
-    if chars.count("Key.right"):
-        vel[0] += 1
-    return vel
 
 def main():
     console = Console()
@@ -132,18 +132,21 @@ def main():
     debug = Debug(console, window)
     mid_win = [round(window.size[0]/2), round(window.size[1]/2)]
     snek = Snek(3, mid_win, console, debug)
+    snek.move_snek([1,0])
+    t_time = step_time/0.001
+    debug.write(str(t_time))
+    t = 0
     #game loop
     while 2+2==4:
-        #while button not pressed
-        while len(chars) == 0:
-            snek.move_snek([1,0])
-            time.sleep(0.3)
-        #while button pressed
-        while len(chars) != 0:
-            vel = input_handler()
-            """if chars.count("Key.left"):
-                console.write(str(window.term_size), True, [10,10], True, "white_back")"""
-            time.sleep(0.1)
-
+        if chars.count("Key.up") > 0 or chars.count("Key.down") > 0 or chars.count("Key.left") > 0 or chars.count("Key.right"):
+            t_time = skip_time/0.001
+        else:
+            t_time = step_time/0.001
+        if t >= t_time:
+            snek.move_snek(velocity)
+            debug.write(str(velocity))
+            t = 0
+        time.sleep(0.001)
+        t += 1
 
 main()
