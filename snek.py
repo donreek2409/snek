@@ -74,22 +74,40 @@ class GameWindow:
         self.size = size
         self.term_size = [os.get_terminal_size().columns, os.get_terminal_size().lines]
         self.console = console
+        self.walls = []
         if size[0] > self.term_size[0] or size[1] > self.term_size[1]:
             self.too_small()
+        self.build_wall_list()
         self.create_border(self.size)
     def create_border(self, size = [19,19]):
         for i in range(size[0]+1):
+            #save wall tile
+            self.walls[i - 1][0] = "wall"
+            self.walls[i - 1][size[1]-1] = "wall"
+            #paint the walls
             self.console.write(" ", True, [i, 0], True, 'white_back')
             self.console.write(" ", True, [i, size[1]], True, 'white_back')
         for i in range(size[1]):
+            #save wall tile
+            self.walls[size[0]-1][i-1] = "wall"
+            self.walls[0][i-1] = "wall"
+            #paint the walls
             self.console.write(" ", True, [0, i], True, 'white_back')
             self.console.write(" ", True, [size[0], i], True, 'white_back')
     def get_term_size(self):
         self.term_size = os.get_terminal_size()
         return self.term_size
+    def build_wall_list(self):
+        for i in range(0,self.size[0]):
+            self.walls.append([])
+            for j in range(0,self.size[1]):
+                self.walls[i].append([])
     def too_small(self):
         self.console.clear()
         self.console.write("Console not large enough for application. Please resize your console window and relaunch.\nQuitting now...")
+        quit()
+    def quit_game(self):
+        self.console.clear()
         quit()
 
 class Debug:
@@ -103,11 +121,12 @@ class Debug:
         sys.stdout.flush()
 
 class Snek:
-    def __init__(self, starting_segs:int, start_pos:list, console:Console, debug):
+    def __init__(self, starting_segs:int, start_pos:list, console:Console, debug:Debug, window:GameWindow):
         self.segs = [start_pos]
         self.snek_len = starting_segs
         self.console = console
         self.debug = debug
+        self.window = window
 
     def move_snek(self, vel):
         new_pos = [self.segs[0][0]+vel[0], self.segs[0][1]+vel[1]]
@@ -123,6 +142,9 @@ class Snek:
             else:
                 self.segs[0] = new_pos
                 break
+        #check for wall collision
+        if self.window.walls[self.segs[0][0]][self.segs[0][1]] == "wall":
+            self.window.quit_game()
 
 def main():
     console = Console()
@@ -131,10 +153,9 @@ def main():
     window = GameWindow(console, [100,40])
     debug = Debug(console, window)
     mid_win = [round(window.size[0]/2), round(window.size[1]/2)]
-    snek = Snek(3, mid_win, console, debug)
+    snek = Snek(3, mid_win, console, debug, window)
     snek.move_snek([1,0])
     t_time = step_time/0.001
-    debug.write(str(t_time))
     t = 0
     #game loop
     while 2+2==4:
@@ -144,7 +165,6 @@ def main():
             t_time = step_time/0.001
         if t >= t_time:
             snek.move_snek(velocity)
-            debug.write(str(velocity))
             t = 0
         time.sleep(0.001)
         t += 1
